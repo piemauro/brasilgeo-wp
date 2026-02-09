@@ -10,84 +10,88 @@ get_header();
 $exclude_ids = array();
 ?>
 
-<!-- Hero / Featured Section -->
+<!-- Hero Section: Big featured + 2 secondary -->
 <section class="hero-section">
 	<div class="container">
+		<?php
+		// Main featured post — try sticky first, fallback to latest.
+		$sticky    = get_option( 'sticky_posts' );
+		$main_args = array(
+			'posts_per_page'      => 1,
+			'post_status'         => 'publish',
+			'no_found_rows'       => true,
+			'ignore_sticky_posts' => 1,
+		);
+		if ( ! empty( $sticky ) ) {
+			$main_args['post__in'] = $sticky;
+		}
+		$main_query = new WP_Query( $main_args );
+
+		// Fallback: if sticky not found, get the latest post.
+		if ( ! $main_query->have_posts() ) {
+			$main_query = new WP_Query( array(
+				'posts_per_page'      => 1,
+				'post_status'         => 'publish',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => 1,
+			) );
+		}
+
+		if ( $main_query->have_posts() ) :
+			$main_query->the_post();
+			$exclude_ids[] = get_the_ID();
+			$hero_img = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'brasilgeo-featured' ) : brasilgeo_placeholder_image( 'brasilgeo-featured' );
+		?>
 		<div class="hero-grid">
-			<?php
-			// Main featured post (most recent sticky or latest)
-			$sticky = get_option( 'sticky_posts' );
-			$main_args = array(
-				'posts_per_page' => 1,
-				'no_found_rows'  => true,
-			);
-			if ( ! empty( $sticky ) ) {
-				$main_args['post__in']            = $sticky;
-				$main_args['ignore_sticky_posts'] = 1;
-			}
-			$main_query = new WP_Query( $main_args );
-
-			if ( $main_query->have_posts() ) :
-				$main_query->the_post();
-				$exclude_ids[] = get_the_ID();
-			?>
-				<article class="featured-main fade-in-up">
-					<a href="<?php the_permalink(); ?>" class="featured-image">
-						<?php if ( has_post_thumbnail() ) : ?>
-							<?php the_post_thumbnail( 'brasilgeo-featured' ); ?>
-						<?php else : ?>
-							<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-featured' ) ); ?>" alt="<?php the_title_attribute(); ?>">
-						<?php endif; ?>
-						<div class="image-overlay"></div>
-					</a>
-					<div class="featured-content">
-						<div class="post-meta">
-							<?php echo brasilgeo_category_badge(); // phpcs:ignore -- safe HTML ?>
-							<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
-							<span class="meta-sep"></span>
-							<span class="meta-reading-time"><?php echo esc_html( brasilgeo_reading_time() ); ?></span>
-						</div>
-						<h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-						<p class="excerpt"><?php echo esc_html( brasilgeo_custom_excerpt( 200 ) ); ?></p>
-						<div class="post-meta" style="margin-top:0.5rem;">
-							<span class="meta-author">Por <?php echo esc_html( get_the_author() ); ?></span>
-						</div>
+			<!-- Main Hero -->
+			<div class="hero-main" style="background-image:url('<?php echo esc_url( $hero_img ); ?>');">
+				<a href="<?php the_permalink(); ?>" class="hero-main__link" aria-label="<?php the_title_attribute(); ?>"></a>
+				<div class="hero-main__overlay"></div>
+				<div class="hero-main__content">
+					<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
+					<h1><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h1>
+					<p class="hero-main__excerpt"><?php echo esc_html( brasilgeo_custom_excerpt( 180 ) ); ?></p>
+					<div class="post-meta post-meta--light">
+						<span class="meta-author">Por <?php echo esc_html( get_the_author() ); ?></span>
+						<span class="meta-sep"></span>
+						<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
+						<span class="meta-sep"></span>
+						<span class="meta-reading-time"><?php echo esc_html( brasilgeo_reading_time() ); ?></span>
 					</div>
-				</article>
-			<?php
-				wp_reset_postdata();
-			endif;
-			?>
+				</div>
+			</div>
 
-			<!-- Sidebar Featured -->
-			<div class="featured-sidebar">
+			<!-- Secondary Highlights -->
+			<div class="hero-secondary">
 				<?php
-				$side_query = new WP_Query( array(
-					'posts_per_page' => 4,
-					'post__not_in'   => $exclude_ids,
-					'no_found_rows'  => true,
+				wp_reset_postdata();
+
+				$sec_query = new WP_Query( array(
+					'posts_per_page'      => 2,
+					'post__not_in'        => $exclude_ids,
+					'post_status'         => 'publish',
+					'no_found_rows'       => true,
+					'ignore_sticky_posts' => 1,
 				) );
 
-				if ( $side_query->have_posts() ) :
-					while ( $side_query->have_posts() ) : $side_query->the_post();
+				if ( $sec_query->have_posts() ) :
+					while ( $sec_query->have_posts() ) : $sec_query->the_post();
 						$exclude_ids[] = get_the_ID();
+						$sec_img = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'brasilgeo-card' ) : brasilgeo_placeholder_image( 'brasilgeo-card' );
 				?>
-					<article class="featured-sidebar-item fade-in-up">
-						<?php if ( has_post_thumbnail() ) : ?>
-							<a href="<?php the_permalink(); ?>" class="thumb">
-								<?php the_post_thumbnail( 'brasilgeo-thumb' ); ?>
-							</a>
-						<?php endif; ?>
-						<div class="item-content">
+					<div class="hero-card" style="background-image:url('<?php echo esc_url( $sec_img ); ?>');">
+						<a href="<?php the_permalink(); ?>" class="hero-card__link" aria-label="<?php the_title_attribute(); ?>"></a>
+						<div class="hero-card__overlay"></div>
+						<div class="hero-card__content">
 							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
-							<h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
-							<div class="post-meta">
+							<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+							<div class="post-meta post-meta--light">
 								<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
 								<span class="meta-sep"></span>
 								<span class="meta-reading-time"><?php echo esc_html( brasilgeo_reading_time() ); ?></span>
 							</div>
 						</div>
-					</article>
+					</div>
 				<?php
 					endwhile;
 					wp_reset_postdata();
@@ -95,10 +99,59 @@ $exclude_ids = array();
 				?>
 			</div>
 		</div>
+		<?php
+		else :
+			wp_reset_postdata();
+		endif;
+		?>
 	</div>
 </section>
 
-<!-- Latest Articles Section -->
+<!-- Quick Links Row: 4 small highlight cards -->
+<section class="quick-links-section">
+	<div class="container">
+		<div class="quick-links-grid">
+			<?php
+			$quick_query = new WP_Query( array(
+				'posts_per_page'      => 4,
+				'post__not_in'        => $exclude_ids,
+				'post_status'         => 'publish',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => 1,
+			) );
+
+			if ( $quick_query->have_posts() ) :
+				while ( $quick_query->have_posts() ) : $quick_query->the_post();
+					$exclude_ids[] = get_the_ID();
+			?>
+				<article class="quick-card fade-in-up">
+					<a href="<?php the_permalink(); ?>" class="quick-card__link">
+						<div class="quick-card__thumb">
+							<?php if ( has_post_thumbnail() ) : ?>
+								<?php the_post_thumbnail( 'brasilgeo-thumb' ); ?>
+							<?php else : ?>
+								<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-thumb' ) ); ?>" alt="<?php the_title_attribute(); ?>">
+							<?php endif; ?>
+						</div>
+						<div class="quick-card__body">
+							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
+							<h4><?php the_title(); ?></h4>
+							<span class="post-meta">
+								<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
+							</span>
+						</div>
+					</a>
+				</article>
+			<?php
+				endwhile;
+				wp_reset_postdata();
+			endif;
+			?>
+		</div>
+	</div>
+</section>
+
+<!-- Latest Articles — 3-column grid -->
 <section class="posts-section">
 	<div class="container">
 		<div class="section-header">
@@ -106,18 +159,16 @@ $exclude_ids = array();
 				<span class="title-accent"></span>
 				Ultimas Noticias
 			</h2>
-			<a href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ); ?>" class="section-link">
-				Ver todas
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-			</a>
 		</div>
 
 		<div class="posts-grid">
 			<?php
 			$latest_query = new WP_Query( array(
-				'posts_per_page' => 6,
-				'post__not_in'   => $exclude_ids,
-				'no_found_rows'  => true,
+				'posts_per_page'      => 6,
+				'post__not_in'        => $exclude_ids,
+				'post_status'         => 'publish',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => 1,
 			) );
 
 			if ( $latest_query->have_posts() ) :
@@ -126,18 +177,15 @@ $exclude_ids = array();
 					$exclude_ids[] = get_the_ID();
 					$count++;
 			?>
-				<article class="post-card fade-in-up stagger-<?php echo esc_attr( min( $count, 4 ) ); ?>">
-					<?php if ( has_post_thumbnail() ) : ?>
-						<a href="<?php the_permalink(); ?>" class="card-image">
+				<article class="post-card fade-in-up">
+					<a href="<?php the_permalink(); ?>" class="card-image">
+						<?php if ( has_post_thumbnail() ) : ?>
 							<?php the_post_thumbnail( 'brasilgeo-card' ); ?>
-							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
-						</a>
-					<?php else : ?>
-						<a href="<?php the_permalink(); ?>" class="card-image">
+						<?php else : ?>
 							<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-card' ) ); ?>" alt="<?php the_title_attribute(); ?>">
-							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
-						</a>
-					<?php endif; ?>
+						<?php endif; ?>
+						<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
+					</a>
 					<div class="card-body">
 						<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
 						<p class="excerpt"><?php echo esc_html( brasilgeo_custom_excerpt( 100 ) ); ?></p>
@@ -160,25 +208,39 @@ $exclude_ids = array();
 </section>
 
 <?php
-// Category-based sections
+// ── Category Sections ──
 $home_cats = get_categories( array(
 	'orderby'    => 'count',
 	'order'      => 'DESC',
 	'number'     => 3,
 	'hide_empty' => true,
+	'exclude'    => array( 1 ), // Exclude "Uncategorized"
 ) );
 
 foreach ( $home_cats as $hcat ) :
 	$cat_query = new WP_Query( array(
-		'cat'            => $hcat->term_id,
-		'posts_per_page' => 4,
-		'post__not_in'   => $exclude_ids,
-		'no_found_rows'  => true,
+		'cat'                 => $hcat->term_id,
+		'posts_per_page'      => 4,
+		'post__not_in'        => $exclude_ids,
+		'post_status'         => 'publish',
+		'no_found_rows'       => true,
+		'ignore_sticky_posts' => 1,
 	) );
+
+	if ( ! $cat_query->have_posts() ) {
+		// If no posts excluding used IDs, get any from category
+		$cat_query = new WP_Query( array(
+			'cat'                 => $hcat->term_id,
+			'posts_per_page'      => 4,
+			'post_status'         => 'publish',
+			'no_found_rows'       => true,
+			'ignore_sticky_posts' => 1,
+		) );
+	}
 
 	if ( $cat_query->have_posts() ) :
 ?>
-<section class="posts-section" style="padding-top:0;">
+<section class="posts-section cat-section">
 	<div class="container">
 		<div class="section-header">
 			<h2 class="section-title">
@@ -187,22 +249,20 @@ foreach ( $home_cats as $hcat ) :
 			</h2>
 			<a href="<?php echo esc_url( get_category_link( $hcat->term_id ) ); ?>" class="section-link">
 				Ver mais
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
 			</a>
 		</div>
 
 		<div class="posts-grid posts-grid-4">
 			<?php while ( $cat_query->have_posts() ) : $cat_query->the_post(); ?>
-				<article class="post-card fade-in-up">
-					<?php if ( has_post_thumbnail() ) : ?>
-						<a href="<?php the_permalink(); ?>" class="card-image">
+				<article class="post-card post-card--compact fade-in-up">
+					<a href="<?php the_permalink(); ?>" class="card-image">
+						<?php if ( has_post_thumbnail() ) : ?>
 							<?php the_post_thumbnail( 'brasilgeo-card' ); ?>
-						</a>
-					<?php else : ?>
-						<a href="<?php the_permalink(); ?>" class="card-image">
+						<?php else : ?>
 							<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-card' ) ); ?>" alt="<?php the_title_attribute(); ?>">
-						</a>
-					<?php endif; ?>
+						<?php endif; ?>
+					</a>
 					<div class="card-body">
 						<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
 						<div class="card-footer">
