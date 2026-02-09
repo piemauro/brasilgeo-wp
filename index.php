@@ -20,7 +20,7 @@ brasilgeo_breadcrumbs();
 					</h1>
 				</div>
 
-				<div class="posts-grid" style="grid-template-columns: repeat(2, 1fr);">
+				<div class="posts-grid posts-grid-2">
 					<?php while ( have_posts() ) : the_post(); ?>
 						<?php get_template_part( 'template-parts/content', 'card' ); ?>
 					<?php endwhile; ?>

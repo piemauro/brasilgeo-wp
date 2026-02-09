@@ -6,6 +6,8 @@
  */
 
 get_header();
+
+$exclude_ids = array();
 ?>
 
 <!-- Hero / Featured Section -->
@@ -27,26 +29,28 @@ get_header();
 
 			if ( $main_query->have_posts() ) :
 				$main_query->the_post();
-				$exclude_ids = array( get_the_ID() );
+				$exclude_ids[] = get_the_ID();
 			?>
 				<article class="featured-main fade-in-up">
-					<?php if ( has_post_thumbnail() ) : ?>
-						<a href="<?php the_permalink(); ?>" class="featured-image">
+					<a href="<?php the_permalink(); ?>" class="featured-image">
+						<?php if ( has_post_thumbnail() ) : ?>
 							<?php the_post_thumbnail( 'brasilgeo-featured' ); ?>
-							<div class="image-overlay"></div>
-						</a>
-					<?php endif; ?>
+						<?php else : ?>
+							<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-featured' ) ); ?>" alt="<?php the_title_attribute(); ?>">
+						<?php endif; ?>
+						<div class="image-overlay"></div>
+					</a>
 					<div class="featured-content">
 						<div class="post-meta">
-							<?php echo brasilgeo_category_badge(); ?>
-							<span class="meta-date"><?php echo get_the_date(); ?></span>
+							<?php echo brasilgeo_category_badge(); // phpcs:ignore -- safe HTML ?>
+							<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
 							<span class="meta-sep"></span>
-							<span class="meta-reading-time"><?php echo brasilgeo_reading_time(); ?></span>
+							<span class="meta-reading-time"><?php echo esc_html( brasilgeo_reading_time() ); ?></span>
 						</div>
 						<h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-						<p class="excerpt"><?php echo brasilgeo_custom_excerpt( 200 ); ?></p>
+						<p class="excerpt"><?php echo esc_html( brasilgeo_custom_excerpt( 200 ) ); ?></p>
 						<div class="post-meta" style="margin-top:0.5rem;">
-							<span class="meta-author">Por <?php the_author(); ?></span>
+							<span class="meta-author">Por <?php echo esc_html( get_the_author() ); ?></span>
 						</div>
 					</div>
 				</article>
@@ -58,12 +62,11 @@ get_header();
 			<!-- Sidebar Featured -->
 			<div class="featured-sidebar">
 				<?php
-				$side_args = array(
+				$side_query = new WP_Query( array(
 					'posts_per_page' => 4,
-					'post__not_in'   => $exclude_ids ?? array(),
+					'post__not_in'   => $exclude_ids,
 					'no_found_rows'  => true,
-				);
-				$side_query = new WP_Query( $side_args );
+				) );
 
 				if ( $side_query->have_posts() ) :
 					while ( $side_query->have_posts() ) : $side_query->the_post();
@@ -76,12 +79,12 @@ get_header();
 							</a>
 						<?php endif; ?>
 						<div class="item-content">
-							<?php echo brasilgeo_category_badge(); ?>
+							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
 							<h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
 							<div class="post-meta">
-								<span class="meta-date"><?php echo get_the_date(); ?></span>
+								<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
 								<span class="meta-sep"></span>
-								<span class="meta-reading-time"><?php echo brasilgeo_reading_time(); ?></span>
+								<span class="meta-reading-time"><?php echo esc_html( brasilgeo_reading_time() ); ?></span>
 							</div>
 						</div>
 					</article>
@@ -111,12 +114,11 @@ get_header();
 
 		<div class="posts-grid">
 			<?php
-			$latest_args = array(
+			$latest_query = new WP_Query( array(
 				'posts_per_page' => 6,
-				'post__not_in'   => $exclude_ids ?? array(),
+				'post__not_in'   => $exclude_ids,
 				'no_found_rows'  => true,
-			);
-			$latest_query = new WP_Query( $latest_args );
+			) );
 
 			if ( $latest_query->have_posts() ) :
 				$count = 0;
@@ -124,21 +126,26 @@ get_header();
 					$exclude_ids[] = get_the_ID();
 					$count++;
 			?>
-				<article class="post-card fade-in-up stagger-<?php echo min( $count, 4 ); ?>">
+				<article class="post-card fade-in-up stagger-<?php echo esc_attr( min( $count, 4 ) ); ?>">
 					<?php if ( has_post_thumbnail() ) : ?>
 						<a href="<?php the_permalink(); ?>" class="card-image">
 							<?php the_post_thumbnail( 'brasilgeo-card' ); ?>
-							<?php echo brasilgeo_category_badge(); ?>
+							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
+						</a>
+					<?php else : ?>
+						<a href="<?php the_permalink(); ?>" class="card-image">
+							<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-card' ) ); ?>" alt="<?php the_title_attribute(); ?>">
+							<?php echo brasilgeo_category_badge(); // phpcs:ignore ?>
 						</a>
 					<?php endif; ?>
 					<div class="card-body">
 						<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-						<p class="excerpt"><?php echo brasilgeo_custom_excerpt( 100 ); ?></p>
+						<p class="excerpt"><?php echo esc_html( brasilgeo_custom_excerpt( 100 ) ); ?></p>
 						<div class="card-footer">
 							<div class="post-meta">
-								<span class="meta-date"><?php echo get_the_date(); ?></span>
+								<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
 								<span class="meta-sep"></span>
-								<span class="meta-reading-time"><?php echo brasilgeo_reading_time(); ?></span>
+								<span class="meta-reading-time"><?php echo esc_html( brasilgeo_reading_time() ); ?></span>
 							</div>
 						</div>
 					</div>
@@ -153,7 +160,7 @@ get_header();
 </section>
 
 <?php
-// Category-based sections (dynamic - shows first 3 categories with 4+ posts)
+// Category-based sections
 $home_cats = get_categories( array(
 	'orderby'    => 'count',
 	'order'      => 'DESC',
@@ -165,7 +172,7 @@ foreach ( $home_cats as $hcat ) :
 	$cat_query = new WP_Query( array(
 		'cat'            => $hcat->term_id,
 		'posts_per_page' => 4,
-		'post__not_in'   => $exclude_ids ?? array(),
+		'post__not_in'   => $exclude_ids,
 		'no_found_rows'  => true,
 	) );
 
@@ -184,19 +191,23 @@ foreach ( $home_cats as $hcat ) :
 			</a>
 		</div>
 
-		<div class="posts-grid" style="grid-template-columns: repeat(4, 1fr);">
+		<div class="posts-grid posts-grid-4">
 			<?php while ( $cat_query->have_posts() ) : $cat_query->the_post(); ?>
 				<article class="post-card fade-in-up">
 					<?php if ( has_post_thumbnail() ) : ?>
 						<a href="<?php the_permalink(); ?>" class="card-image">
 							<?php the_post_thumbnail( 'brasilgeo-card' ); ?>
 						</a>
+					<?php else : ?>
+						<a href="<?php the_permalink(); ?>" class="card-image">
+							<img src="<?php echo esc_url( brasilgeo_placeholder_image( 'brasilgeo-card' ) ); ?>" alt="<?php the_title_attribute(); ?>">
+						</a>
 					<?php endif; ?>
 					<div class="card-body">
 						<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
 						<div class="card-footer">
 							<div class="post-meta">
-								<span class="meta-date"><?php echo get_the_date(); ?></span>
+								<span class="meta-date"><?php echo esc_html( get_the_date() ); ?></span>
 							</div>
 						</div>
 					</div>
@@ -211,15 +222,15 @@ endforeach;
 ?>
 
 <!-- Newsletter Section -->
-<section class="posts-section" style="padding-bottom: var(--section-padding);">
+<section class="posts-section newsletter-section">
 	<div class="container container-narrow" style="text-align:center;">
-		<div class="glass-card-elevated" style="padding: 3rem 2rem;">
-			<h2 class="gradient-text" style="margin-bottom: 0.75rem;">Fique por dentro do mundo GEO</h2>
-			<p style="max-width:500px; margin:0 auto 1.5rem; color:var(--text-muted);">
+		<div class="glass-card-elevated newsletter-cta">
+			<h2 class="gradient-text">Fique por dentro do mundo GEO</h2>
+			<p>
 				Receba as ultimas noticias, analises e tendencias sobre Generative Engine Optimization direto no seu email.
 			</p>
-			<form class="newsletter-form" style="display:flex; gap:0.75rem; max-width:500px; margin:0 auto; flex-wrap:wrap; justify-content:center;">
-				<input type="email" name="email" placeholder="Seu melhor email" style="flex:1; min-width:250px; padding:0.85rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-primary); font-family:'Inter',sans-serif; font-size:0.95rem; outline:none;">
+			<form class="newsletter-form-inline">
+				<input type="email" name="email" placeholder="Seu melhor email" required>
 				<button type="submit" class="btn btn-primary">Inscrever-se</button>
 			</form>
 		</div>

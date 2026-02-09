@@ -11,7 +11,7 @@
 						$logo_id  = get_theme_mod( 'custom_logo' );
 						$logo_url = wp_get_attachment_image_url( $logo_id, 'full' );
 						?>
-						<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php bloginfo( 'name' ); ?>" class="brand-logo" style="height:36px;width:auto;">
+						<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" class="brand-logo" style="height:36px;width:auto;">
 					<?php else : ?>
 						<div class="brand-icon">G</div>
 						<div class="brand-text">Brasil<span>GEO</span></div>
@@ -21,13 +21,13 @@
 				<div class="footer-social">
 					<?php
 					$social_links = array(
-						'twitter'  => get_theme_mod( 'brasilgeo_twitter', '#' ),
-						'linkedin' => get_theme_mod( 'brasilgeo_linkedin', '#' ),
-						'youtube'  => get_theme_mod( 'brasilgeo_youtube', '#' ),
-						'instagram'=> get_theme_mod( 'brasilgeo_instagram', '#' ),
+						'twitter'  => get_theme_mod( 'brasilgeo_twitter', '' ),
+						'linkedin' => get_theme_mod( 'brasilgeo_linkedin', '' ),
+						'youtube'  => get_theme_mod( 'brasilgeo_youtube', '' ),
+						'instagram'=> get_theme_mod( 'brasilgeo_instagram', '' ),
 					);
 					foreach ( $social_links as $network => $url ) :
-						if ( $url && '#' !== $url ) :
+						if ( ! empty( $url ) ) :
 					?>
 						<a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( ucfirst( $network ) ); ?>">
 							<?php brasilgeo_social_icon( $network ); ?>
@@ -103,9 +103,9 @@
 		</div>
 
 		<div class="footer-bottom">
-			<span>&copy; <?php echo esc_html( date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. Todos os direitos reservados.</span>
+			<span>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. Todos os direitos reservados.</span>
 			<span>
-				<a href="<?php echo esc_url( get_privacy_policy_url() ); ?>">Politica de Privacidade</a>
+				<a href="https://brasilgeo.ai" target="_blank" rel="noopener noreferrer">brasilgeo.ai</a>
 			</span>
 		</div>
 	</div>

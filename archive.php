@@ -23,7 +23,7 @@ brasilgeo_breadcrumbs();
 	<h1><?php the_archive_title(); ?></h1>
 
 	<?php if ( get_the_archive_description() ) : ?>
-		<div class="archive-desc"><?php the_archive_description(); ?></div>
+		<div class="archive-desc"><?php echo wp_kses_post( get_the_archive_description() ); ?></div>
 	<?php endif; ?>
 </div>
 
@@ -31,7 +31,7 @@ brasilgeo_breadcrumbs();
 	<div class="content-layout">
 		<div class="main-content">
 			<?php if ( have_posts() ) : ?>
-				<div class="posts-grid" style="grid-template-columns: repeat(2, 1fr);">
+				<div class="posts-grid posts-grid-2">
 					<?php while ( have_posts() ) : the_post(); ?>
 						<?php get_template_part( 'template-parts/content', 'card' ); ?>
 					<?php endwhile; ?>

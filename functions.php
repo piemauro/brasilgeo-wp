@@ -3,14 +3,14 @@
  * Brasil GEO Portal - Theme Functions
  *
  * @package BrasilGEO
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BRASILGEO_VERSION', '1.0.0' );
+define( 'BRASILGEO_VERSION', '1.1.0' );
 define( 'BRASILGEO_DIR', get_template_directory() );
 define( 'BRASILGEO_URI', get_template_directory_uri() );
 
@@ -66,10 +66,10 @@ add_action( 'after_setup_theme', 'brasilgeo_setup' );
  * Enqueue Scripts and Styles
  */
 function brasilgeo_scripts() {
-	// Google Fonts
+	// Google Fonts (optimized weights)
 	wp_enqueue_style(
 		'brasilgeo-fonts',
-		'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap',
 		array(),
 		null
 	);
@@ -142,7 +142,8 @@ add_action( 'widgets_init', 'brasilgeo_widgets_init' );
 function brasilgeo_reading_time( $post_id = null ) {
 	$post_id = $post_id ?: get_the_ID();
 	$content = get_post_field( 'post_content', $post_id );
-	$words   = str_word_count( strip_tags( $content ) );
+	preg_match_all( '/\S+/', strip_tags( $content ), $matches );
+	$words   = count( $matches[0] );
 	$minutes = max( 1, ceil( $words / 200 ) );
 	return sprintf( '%d min de leitura', $minutes );
 }
@@ -161,12 +162,12 @@ function brasilgeo_excerpt_more( $more ) {
 add_filter( 'excerpt_more', 'brasilgeo_excerpt_more' );
 
 /**
- * Custom excerpt
+ * Custom excerpt (returns plain text, safe for esc_html)
  */
 function brasilgeo_custom_excerpt( $limit = 120 ) {
-	$excerpt = get_the_excerpt();
-	if ( strlen( $excerpt ) > $limit ) {
-		$excerpt = substr( $excerpt, 0, $limit ) . '&hellip;';
+	$excerpt = wp_strip_all_tags( get_the_excerpt() );
+	if ( mb_strlen( $excerpt ) > $limit ) {
+		$excerpt = mb_substr( $excerpt, 0, $limit ) . '...';
 	}
 	return $excerpt;
 }
@@ -183,10 +184,12 @@ function brasilgeo_category_badge( $post_id = null ) {
 
 	$cat = $categories[0];
 	$slug_map = array(
-		'geo'     => 'cat-geo',
-		'ia'      => 'cat-ia',
-		'seo'     => 'cat-seo',
-		'mercado' => 'cat-mercado',
+		'geo'         => 'cat-geo',
+		'ia'          => 'cat-ia',
+		'inteligencia'=> 'cat-ia',
+		'seo'         => 'cat-seo',
+		'mercado'     => 'cat-mercado',
+		'tendencia'   => 'cat-mercado',
 	);
 
 	$class = 'cat-geo'; // default
@@ -206,19 +209,19 @@ function brasilgeo_category_badge( $post_id = null ) {
 }
 
 /**
- * Post meta output
+ * Post meta output (escaped)
  */
 function brasilgeo_post_meta( $show_author = true ) {
 	$output = '<div class="post-meta">';
 
 	if ( $show_author ) {
-		$output .= '<span class="meta-author">' . get_the_author() . '</span>';
+		$output .= '<span class="meta-author">' . esc_html( get_the_author() ) . '</span>';
 		$output .= '<span class="meta-sep"></span>';
 	}
 
-	$output .= '<span class="meta-date">' . get_the_date() . '</span>';
+	$output .= '<span class="meta-date">' . esc_html( get_the_date() ) . '</span>';
 	$output .= '<span class="meta-sep"></span>';
-	$output .= '<span class="meta-reading-time">' . brasilgeo_reading_time() . '</span>';
+	$output .= '<span class="meta-reading-time">' . esc_html( brasilgeo_reading_time() ) . '</span>';
 	$output .= '</div>';
 
 	return $output;
@@ -242,17 +245,17 @@ function brasilgeo_breadcrumbs() {
 			echo '<a href="' . esc_url( get_category_link( $cats[0]->term_id ) ) . '">' . esc_html( $cats[0]->name ) . '</a>';
 			echo '<span class="breadcrumb-sep">&rsaquo;</span>';
 		}
-		echo '<span class="current">' . get_the_title() . '</span>';
+		echo '<span class="current">' . esc_html( get_the_title() ) . '</span>';
 	} elseif ( is_category() ) {
-		echo '<span class="current">' . single_cat_title( '', false ) . '</span>';
+		echo '<span class="current">' . esc_html( single_cat_title( '', false ) ) . '</span>';
 	} elseif ( is_tag() ) {
-		echo '<span class="current">' . single_tag_title( '', false ) . '</span>';
+		echo '<span class="current">' . esc_html( single_tag_title( '', false ) ) . '</span>';
 	} elseif ( is_search() ) {
 		echo '<span class="current">Busca</span>';
 	} elseif ( is_404() ) {
 		echo '<span class="current">404</span>';
 	} elseif ( is_page() ) {
-		echo '<span class="current">' . get_the_title() . '</span>';
+		echo '<span class="current">' . esc_html( get_the_title() ) . '</span>';
 	} else {
 		echo '<span class="current">Arquivo</span>';
 	}
@@ -264,8 +267,8 @@ function brasilgeo_breadcrumbs() {
  * Social share URLs
  */
 function brasilgeo_share_urls() {
-	$url   = urlencode( get_permalink() );
-	$title = urlencode( get_the_title() );
+	$url   = rawurlencode( get_permalink() );
+	$title = rawurlencode( get_the_title() );
 
 	return array(
 		'twitter'  => "https://twitter.com/intent/tweet?url={$url}&text={$title}",
@@ -273,6 +276,22 @@ function brasilgeo_share_urls() {
 		'linkedin' => "https://www.linkedin.com/sharing/share-offsite/?url={$url}",
 		'whatsapp' => "https://api.whatsapp.com/send?text={$title}%20{$url}",
 	);
+}
+
+/**
+ * Fallback menu when no menu is configured
+ */
+function brasilgeo_fallback_menu() {
+	echo '<ul class="menu">';
+	echo '<li class="menu-item"><a href="' . esc_url( home_url( '/' ) ) . '">Home</a></li>';
+
+	$cats = get_categories( array( 'number' => 5, 'orderby' => 'count', 'order' => 'DESC', 'hide_empty' => true ) );
+	foreach ( $cats as $cat ) {
+		echo '<li class="menu-item"><a href="' . esc_url( get_category_link( $cat->term_id ) ) . '">' . esc_html( $cat->name ) . '</a></li>';
+	}
+
+	echo '<li class="menu-item"><a href="https://brasilgeo.ai" target="_blank" rel="noopener noreferrer">Conhecer GEO</a></li>';
+	echo '</ul>';
 }
 
 /**
@@ -309,7 +328,7 @@ function brasilgeo_resource_hints( $urls, $relation_type ) {
 add_filter( 'wp_resource_hints', 'brasilgeo_resource_hints', 10, 2 );
 
 /**
- * Disable Gutenberg editor color palette (use theme colors)
+ * Editor color palette
  */
 function brasilgeo_editor_settings() {
 	add_theme_support( 'editor-color-palette', array(

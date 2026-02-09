@@ -2115,22 +2115,24 @@ img {
 
 /* Mobile Navigation Overlay */
 .mobile-nav {
-  display: none;
   position: fixed;
   top: 0;
-  right: -100%;
+  right: 0;
   width: 300px;
   height: 100vh;
   background: var(--bg-secondary);
   border-left: 1px solid var(--border-color);
   z-index: var(--z-overlay);
   padding: 5rem 2rem 2rem;
-  transition: right var(--transition);
   overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform var(--transition);
+  visibility: hidden;
 }
 
 .mobile-nav.active {
-  right: 0;
+  transform: translateX(0);
+  visibility: visible;
 }
 
 .mobile-nav .menu {
@@ -2189,4 +2191,220 @@ img {
   inset: 0;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
   animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   RESPONSIVE GRID VARIANTS (CSS classes, not inline)
+   ============================================ */
+.posts-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.posts-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .posts-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .posts-grid-2,
+  .posts-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   SKIP LINK (Accessibility)
+   ============================================ */
+.skip-link:focus {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 999;
+  padding: 0.75rem 1.5rem;
+  background: var(--gradient-primary);
+  color: var(--bg-primary);
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  clip: auto;
+  width: auto;
+  height: auto;
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   BREADCRUMBS
+   ============================================ */
+.breadcrumbs {
+  padding: 1rem 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.breadcrumbs a {
+  color: var(--text-muted);
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-primary);
+}
+
+.breadcrumb-sep {
+  margin: 0 0.5rem;
+  color: var(--text-dim);
+}
+
+.breadcrumbs .current {
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   NEWSLETTER CTA (Front Page)
+   ============================================ */
+.newsletter-section {
+  padding-bottom: var(--section-padding);
+}
+
+.newsletter-cta {
+  padding: 3rem 2rem;
+}
+
+.newsletter-cta h2 {
+  margin-bottom: 0.75rem;
+}
+
+.newsletter-cta p {
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
+  color: var(--text-muted);
+}
+
+.newsletter-form-inline {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 500px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.newsletter-form-inline input[type="email"] {
+  flex: 1;
+  min-width: 250px;
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.newsletter-form-inline input[type="email"]:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.newsletter-form-inline input[type="email"]::placeholder {
+  color: var(--text-dim);
+}
+
+@media (max-width: 480px) {
+  .newsletter-form-inline {
+    flex-direction: column;
+  }
+  .newsletter-form-inline input[type="email"] {
+    min-width: 0;
+    width: 100%;
+  }
+  .newsletter-form-inline .btn {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   FOCUS STYLES (Accessibility)
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.post-card:focus-within {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: var(--shadow-glow);
+}
+
+.featured-sidebar-item:focus-within {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ticker-items {
+    animation: none;
+  }
+}
+
+/* ============================================
+   PAGE LINKS (wp_link_pages)
+   ============================================ */
+.page-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
+.page-links .page-links-title {
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-right: 0.5rem;
+}
+
+.page-links a,
+.page-links > span:not(.page-links-title) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.page-links > span:not(.page-links-title) {
+  background: var(--gradient-primary);
+  color: var(--bg-primary);
+  border-color: transparent;
 }

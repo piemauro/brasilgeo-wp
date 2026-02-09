@@ -22,38 +22,9 @@ function brasilgeo_social_icon( $network ) {
 	);
 
 	if ( isset( $icons[ $network ] ) ) {
-		echo $icons[ $network ];
+		echo $icons[ $network ]; // phpcs:ignore -- Safe hardcoded SVG
 	}
 }
-
-/**
- * Breadcrumb styles
- */
-function brasilgeo_breadcrumbs_styles() {
-	?>
-	<style>
-		.breadcrumbs {
-			padding: 1rem 0;
-			font-size: 0.8rem;
-			color: var(--text-dim);
-		}
-		.breadcrumbs a {
-			color: var(--text-muted);
-		}
-		.breadcrumbs a:hover {
-			color: var(--color-primary);
-		}
-		.breadcrumb-sep {
-			margin: 0 0.5rem;
-			color: var(--text-dim);
-		}
-		.breadcrumbs .current {
-			color: var(--text-secondary);
-		}
-	</style>
-	<?php
-}
-add_action( 'wp_head', 'brasilgeo_breadcrumbs_styles' );
 
 /**
  * Placeholder image if no thumbnail
